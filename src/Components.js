@@ -11,7 +11,9 @@ const Components = () => {
     var date = LastWeek.getFullYear() + '-' + (LastWeek.getMonth()+1) + '-' + (LastWeek.getDate())
 
     const [data, setData] = useState([])
-    const [Language, setLanguage] = useState("")    
+    const [Language, setLanguage] = useState("") 
+    const [Loading, setLoading] = useState(true) 
+
 
     useEffect(() => {
         getData();
@@ -21,10 +23,12 @@ const Components = () => {
         fetchData().then(data => {
             if(data.error){
                 console.log(data.error)
+                setLoading(false)
+
             }
             else {
                 setData(data.items)
-                console.log(data)
+                setLoading(false)
             }
         })
     }
@@ -42,10 +46,42 @@ const Components = () => {
     }
 
     const onSubmit = (e) => {
-        e.preventDefault();
-        getData();
-        setLanguage("");
         
+        e.preventDefault()
+        setLoading(true)
+
+        getData() 
+        ShowList()
+           
+        setLanguage("");
+             
+    }
+
+    const ShowList = () =>  {
+        if(!data) return (
+            <h3>No matches found</h3>
+        );
+
+        return (
+                !Loading ?
+                <div>
+                    <h3  style={{ marginLeft:'20px'}}>Showing latest results </h3>
+                <hr/>
+                
+                {data && data.map((object, index) => (
+                    <React.Fragment key={index}>
+                        <Block 
+                        name = {object.full_name}
+                        description = {object.description}
+                        language = {object.language}
+                        />
+                        <hr/>
+                    </React.Fragment>
+                ))}
+                </div>
+        
+                : <h4 style={{margin:'50px'}}>Loading..</h4>
+        )
     }
         
     return (
@@ -64,6 +100,7 @@ const Components = () => {
                         value={Language}
                         placeholder="Search language ex-Java"
                     />
+
                     <button 
                         className="btn btn-small"
                         style={{  borderRadius:'5%', height:'50px', marginTop:'2px', marginLeft:'7px' }} 
@@ -76,19 +113,7 @@ const Components = () => {
 
             </div>
             
-            <h3  style={{ marginLeft:'20px'}}>Showing latest results </h3>
-            <hr/>
-
-            {data && data.map((object, index) => (
-                <React.Fragment key={index}>
-                    <Block 
-                    name = {object.full_name}
-                    description = {object.description}
-                    language = {object.language}
-                    />
-                    <hr/>
-                </React.Fragment>
-            ))}
+            {ShowList()}
 
         </div>    
     )
